@@ -119,6 +119,26 @@ function generateModule(name, gir, module) {
         .replace(/argc\: number, argv\: string\[\]/g, "argv:string[]")
 }
 
+function addDocumentation(obj, indent, out) {
+    let doc = obj.doc;
+    let doc_dep = obj['doc-deprecated'];
+
+    if (doc) {
+        let line = [];
+        line.push(indent);
+        line.push('/** ');
+        line.push(doc[0]._);
+
+        if (doc_dep) {
+            line.push('\n\n');
+            line.push(doc_dep[0]._);
+        }
+
+        line.push(' */');
+        out.push(line.join(''));
+    } 
+}
+
 function addGirInfoForClass(modName, patch, add, klass, out) {
     let name = klass.$['name']
     let pt = patch ? patch[name] : null
@@ -129,6 +149,8 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
         if (klass.$['parent']) 
             def.push(` extends ${klass.$['parent']}`)
         def.push(' {')
+
+        addDocumentation(klass, '    ', out);
         out.push(def.join(''))
 
         /**
@@ -158,6 +180,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                         line.push(')')
                     line.push(getReturnType(modName, func))
                 // }
+                addDocumentation(func, '        ', out);                
                 out.push(line.join(''))
             }
             
@@ -233,6 +256,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                         line.push(')')
                     line.push(getReturnType(modName, method))
                 }
+                addDocumentation(method, '        ', out);                
                 out.push(line.join(''))
             }
         }
@@ -243,17 +267,6 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                 let prop_name = prop.$['name'];
                 let writable = prop.$['writable'];
                 let type = getType(modName, prop);
-                let doc = prop.doc;
-                let doc_dep = prop['doc-deprecated'];
-
-                if (doc) {
-                    let line = [];
-                    line.push('        ');
-                    line.push('/* ');
-                    line.push(doc[0]._);
-                    line.push(' */');
-                    out.push(line.join(''));
-                }
 
                 let line = [];
                 line.push('        ');
@@ -263,8 +276,8 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                 line.push(type);
                 line.push(';');
 
+                addDocumentation(prop, '        ', out);
                 out.push(line.join(''));
-                // console.log(`${name}.` + line.join(''));
             }
         }
         
