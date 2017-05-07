@@ -4,25 +4,23 @@
     "module": "amd",
     "rootDir": "src",
     "allowJs": true,
-    "allowUnreachableCode": true,
-    "allowUnusedLabels": true,
     "outFile": "index.js"
   },
   "files": [
-    "src/webkit-3.0.d.ts",
-    "src/soup-2.4.d.ts",
-    "src/pango-1.0.d.ts",
-    "src/gdk-3.0.d.ts",
-    "src/gtk-3.0.d.ts",
-    "src/gtksource-3.0.d.ts",
-    "src/gobject-2.0.d.ts",
-    "src/glib-2.0.d.ts",
-    "src/gio-2.0.d.ts",
-    "src/gda-5.0.d.ts",
-    "src/atk-1.0.d.ts",
+    "src/WebKit.d.ts",
+    "src/Soup.d.ts",
+    "src/Pango.d.ts",
+    "src/Gdk.d.ts",
+    "src/Gtk.d.ts",
+    "src/GtkSource.d.ts",
+    "src/GObject.d.ts",
+    "src/GLib.d.ts",
+    "src/Gio.d.ts",
+    "src/Gda.d.ts",
+    "src/Atk.d.ts",
     "src/gjs.d.ts",
     "src/gjs.js",
     "example/imports.ts",
-    "example/example.ts"
+    "example/record-collection.ts"
   ]
 }

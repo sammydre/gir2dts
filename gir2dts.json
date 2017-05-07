@@ -2,12 +2,12 @@
     "module": {
         "Atk": {
             "source": "/usr/share/gir-1.0/Atk-1.0.gir",
-            "output": "src/atk-1.0.d.ts",
+            "output": "src/Atk.d.ts",
             "import": ["GObject"]
         },
         "Gda": {
             "source": "/usr/share/gir-1.0/Gda-5.0.gir",
-            "output": "src/gda-5.0.d.ts",
+            "output": "src/Gda.d.ts",
             "import": ["GObject", "GLib"],
             "patch": {
                 "Connection": {
@@ -18,13 +18,13 @@
         },
         "Gio": {
             "source": "/usr/share/gir-1.0/Gio-2.0.gir",
-            "output": "src/gio-2.0.d.ts",
+            "output": "src/Gio.d.ts",
             "patch": "patches/gio.d.ts",
             "import": ["GObject", "GLib"]
         },
         "GLib": {
             "source": "/usr/share/gir-1.0/GLib-2.0.gir",
-            "output": "src/glib-2.0.d.ts",
+            "output": "src/GLib.d.ts",
             "add": {
                 "Application": {
                     "run": "run(argv: any)"
@@ -33,7 +33,7 @@
         },
         "GObject": {
             "source": "/usr/share/gir-1.0/GObject-2.0.gir",
-            "output": "src/gobject-2.0.d.ts",
+            "output": "src/GObject.d.ts",
             "patch": "patches/gobject.d.ts",
             "add": {
                 "Object": {
@@ -50,12 +50,12 @@
         
         "GtkSource": {
             "source": "/usr/share/gir-1.0/GtkSource-3.0.gir",
-            "output": "src/gtksource-3.0.d.ts",
+            "output": "src/GtkSource.d.ts",
             "import": ["GObject", "Gio", "Gdk", "Gtk"]
         },
         "Gtk": {
             "source": "/usr/share/gir-1.0/Gtk-3.0.gir",
-            "output": "src/gtk-3.0.d.ts",
+            "output": "src/Gtk.d.ts",
             "import": ["GObject", "GLib", "Gio", "Gdk", "Atk","Pango"],
             "add": {
                 "Application": {
@@ -187,17 +187,17 @@
         },
         "Gdk": {
             "source": "/usr/share/gir-1.0/Gdk-3.0.gir",
-            "output": "src/gdk-3.0.d.ts",
+            "output": "src/Gdk.d.ts",
             "import": ["GObject", "Gio", "Pango"]
         },
         "Pango": {
             "source": "/usr/share/gir-1.0/Pango-1.0.gir",
-            "output": "src/pango-1.0.d.ts",
+            "output": "src/Pango.d.ts",
             "import": ["GObject"]
         },
         "Soup": {
             "source": "/usr/share/gir-1.0/Soup-2.4.gir",
-            "output": "src/soup-2.4.d.ts",
+            "output": "src/Soup.d.ts",
             "import": ["GObject", "Gio", "GLib"],
             "patch": {
                 "Message": {
@@ -207,7 +207,7 @@
         },
         "WebKit": {
             "source": "/usr/share/gir-1.0/WebKit-3.0.gir",
-            "output": "src/webkit-3.0.d.ts",
+            "output": "src/WebKit.d.ts",
             "import": ["GObject", "Gio", "Gtk", "Soup"],
             "patch": {
                 "DOMCharacterData": {
