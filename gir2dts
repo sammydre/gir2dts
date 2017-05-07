@@ -61,7 +61,6 @@ function build(cfg, gir) {
 // pass 1 - generate a symbol table of all known identifiers
 ////////////////////////////////////////////////////////////////////////////////////////////
 function getSymbols(module, gir) {
-
     let ns = gir.repository.namespace[0]
     if (ns.function) 
         for (let func of ns.function) {
@@ -309,6 +308,24 @@ function addGirInfo(modName, gir, patch, add, out) {
                         out.push(line.join(''))
                     }
                 }
+
+                if (klass.property) {
+                    for (let prop of klass.property) {
+                        let prop_name = prop.$['name'];
+                        let writable = prop.$['writable'];
+                        let type = getType(modName, prop);
+
+                        let line = ['        '];
+                        if (!writable) line.push('readonly ');
+                        line.push(prop_name.replace(/-/g, '_'));
+                        line.push(': ');
+                        line.push(type);
+                        line.push(';');
+
+                        out.push(line.join(''));
+                        // console.log(`${name}.` + line.join(''));
+                    }
+                }
                 
                 out.push('    }')
             } catch (e) {
@@ -340,8 +357,10 @@ function getType(modName, parameter) {
         if (parameter.array[0].type) {
             name = parameter.array[0].type[0].$['name']
         }
-    } else if (parameter.type) {
+    } else if (parameter.type && parameter.type[0].$) {
         name = parameter.type[0].$['name']
+    } else {
+        return 'any';
     }
 
     let x = name.split(' ')
