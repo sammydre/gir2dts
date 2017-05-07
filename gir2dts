@@ -120,6 +120,9 @@ function generateModule(name, gir, module) {
 }
 
 function addDocumentation(obj, indent, out) {
+    // TODO: make docs optional
+    return;
+    
     let doc = obj.doc;
     let doc_dep = obj['doc-deprecated'];
 
@@ -158,13 +161,14 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
          */
         if (klass.function) {
             for (let func of klass.function) {
-                if (func.$['name'] === "new") continue // Use standard constructor
-                if (func.$['name'] === "newv") continue // FIXME!
+                let func_name = func.$['name']; 
+                if (func_name === "new") continue // Use standard constructor
+                if (func_name === "newv") continue // FIXME!
                 let line = []
                 // if (pt && pt[method.$['name']]) {
                 //     out.push('        '+pt[method.$['name']])
                 // } else {
-                    line.push(`        static ${func.$['name']}(`)
+                    line.push(`        static ${func_name}(`)
                     if (func.parameters) {
                         if (func.parameters[0].parameter)
                             for (let parameter of func.parameters[0].parameter) {
@@ -180,10 +184,11 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                         line.push(')')
                     line.push(getReturnType(modName, func))
                 // }
-                addDocumentation(func, '        ', out);                
-                out.push(line.join(''))
+                if (func_name) {
+                    addDocumentation(func, '        ', out)                
+                    out.push(line.join(''))
+                }
             }
-            
         }
         /**
          * Constructors
@@ -236,11 +241,28 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
          */
         if (klass.method) {
             for (let method of klass.method) {
+                let method_name = method.$['name']
+
+                if (typeof method.$['introspectable'] != 'undefined' &&
+                        (method.$['introspectable']) == "0") {
+                    console.log('skip ' + method_name);;
+                    continue;
+                }
+
+                if (!method_name) {
+                    method_name = method.$['moved-to'];
+                }
+                if (!method_name) {
+                    continue;
+                }
+
+                addDocumentation(method, '        ', out);                
+
                 let line = []
-                if (pt && pt[method.$['name']]) {
-                    out.push('        '+pt[method.$['name']])
+                if (pt && pt[method_name]) {
+                    out.push('        '+pt[method_name])
                 } else {
-                    line.push(`        ${method.$['name']}(`)
+                    line.push(`        ${method_name}(`)
                     if (method.parameters) {
                         if (method.parameters[0].parameter)
                             for (let parameter of method.parameters[0].parameter) {
@@ -256,7 +278,6 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                         line.push(')')
                     line.push(getReturnType(modName, method))
                 }
-                addDocumentation(method, '        ', out);                
                 out.push(line.join(''))
             }
         }
@@ -265,6 +286,12 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
         if (klass.property) {
             for (let prop of klass.property) {
                 let prop_name = prop.$['name'];
+
+                if (pt && typeof pt[prop_name] != 'undefined') {
+                    out.push('        '+pt[prop_name])
+                    continue
+                }
+
                 let writable = prop.$['writable'];
                 let type = getType(modName, prop);
 
@@ -295,6 +322,7 @@ function addGirInfo(modName, gir, patch, add, out) {
     if (ns.constant)
         for (let constant of ns.constant) {
             let name = constant.$['name'] 
+            addDocumentation(constant, '    ', out);
             out.push(`    export const ${name}:${getType(modName, constant)}`)
         }
 
@@ -302,7 +330,7 @@ function addGirInfo(modName, gir, patch, add, out) {
     if (ns.function) 
         for (let func of ns.function) {
             let name = getName(func.$['name'])
-            
+
             try {
                 let def = []
                 def.push(`    export function ${name}(`)
@@ -320,6 +348,7 @@ function addGirInfo(modName, gir, patch, add, out) {
                 else
                     def.push(')')
                 def.push(getReturnType(modName, func))
+                addDocumentation(func, '    ', out);
                 out.push(def.join(''))
             } catch (e) {
                 console.log(e.message)
@@ -338,6 +367,7 @@ function addGirInfo(modName, gir, patch, add, out) {
                     if (name[0] >= '0' && name[0] <= '9') name = "_"+name
                     out.push(`        ${name},`)
                 }
+                addDocumentation(enumeration, '    ', out);
                 out.push('    }')
             } catch (e) {
                 console.log(e.message)
@@ -355,6 +385,7 @@ function addGirInfo(modName, gir, patch, add, out) {
                     if (name[0] >= '0' && name[0] <= '9') name = "_"+name
                     out.push(`        ${name},`)
                 }
+                addDocumentation(bitfield, '    ', out);
                 out.push('    }')
             } catch (e) {
                 console.log(e.message)
@@ -381,6 +412,8 @@ function getName(name) {
         case 'true': return 'true_'
         case 'false': return 'false_'
         case 'break': return 'break_'
+        case 'arguments': return 'arguments_'
+        case 'eval': return 'eval_'
     }
     return name
 }
@@ -436,7 +469,9 @@ function getType(modName, parameter) {
         case 'object':   return 'any'+isArray
         case 'va_list':  return 'any'+isArray
         default:
-            if (sym[name] || sym[`${modName}.${name}`]) 
+            if (name.startsWith(`${modName}.`) && sym[name])
+                return name.substring(modName.length + 1) + isArray
+            else if (sym[name] || sym[`${modName}.${name}`])
                 return name+isArray
             else
                 return 'any'+isArray

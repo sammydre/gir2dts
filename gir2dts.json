@@ -35,6 +35,7 @@
             "source": "/usr/share/gir-1.0/GObject-2.0.gir",
             "output": "src/GObject.d.ts",
             "patch": "patches/gobject.d.ts",
+            "import": ["GLib"],
             "add": {
                 "Object": {
                     "connect": "connect(...args: any[]):any",
@@ -51,7 +52,7 @@
         "GtkSource": {
             "source": "/usr/share/gir-1.0/GtkSource-3.0.gir",
             "output": "src/GtkSource.d.ts",
-            "import": ["GObject", "Gio", "Gdk", "Gtk"]
+            "import": ["GObject", "Gio", "Gdk", "Gtk", "GLib", "Pango"]
         },
         "Gtk": {
             "source": "/usr/share/gir-1.0/Gtk-3.0.gir",
@@ -74,6 +75,9 @@
                 }
             },
             "patch" : {
+                "AppChooserWidget": {
+                    "show-all": ""
+                },
                 "Bin": {
                     "mnemonic_activate": "mnemonic_activate(...args: any[]):boolean"
                 },
@@ -99,7 +103,8 @@
                 "ListStore": {
                     "append": "append():any",
                     "newv": "static newv(...args: any[]):ListStore",
-                    "set_column_types": "set_column_types(types: number[]):void"
+                    "set_column_types": "set_column_types(types: number[]):void",
+                    "set_valist": ""
                 },
                 "MenuButton": {
                     "get_direction": "get_direction(): number",
@@ -188,12 +193,12 @@
         "Gdk": {
             "source": "/usr/share/gir-1.0/Gdk-3.0.gir",
             "output": "src/Gdk.d.ts",
-            "import": ["GObject", "Gio", "Pango"]
+            "import": ["GObject", "Gio", "Pango", "GLib"]
         },
         "Pango": {
             "source": "/usr/share/gir-1.0/Pango-1.0.gir",
             "output": "src/Pango.d.ts",
-            "import": ["GObject"]
+            "import": ["GObject","GLib"]
         },
         "Soup": {
             "source": "/usr/share/gir-1.0/Soup-2.4.gir",
@@ -208,7 +213,7 @@
         "WebKit": {
             "source": "/usr/share/gir-1.0/WebKit-3.0.gir",
             "output": "src/WebKit.d.ts",
-            "import": ["GObject", "Gio", "Gtk", "Soup"],
+            "import": ["GObject", "Gio", "Gtk", "Soup", "GLib", "Gdk"],
             "patch": {
                 "DOMCharacterData": {
                     "replace_data": "replace_data(...args: any[]):any"
