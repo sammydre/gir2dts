@@ -82,6 +82,11 @@ function getSymbols(module, gir) {
             let name = klass.$['name']
             sym[`${module}.${name}`] = `${module}.${name}`
         }
+    if (ns.record)
+        for (let klass of ns.record) {
+            let name = klass.$['name']
+            sym[`${module}.${name}`] = `${module}.${name}`
+        }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 // pass 2 - process each file
@@ -114,6 +119,148 @@ function generateModule(name, gir, module) {
         .replace(/argc\: number, argv\: string\[\]/g, "argv:string[]")
 }
 
+function addGirInfoForClass(modName, patch, add, klass, out) {
+    let name = klass.$['name']
+    let pt = patch ? patch[name] : null
+    let ad = add ? add[name] : null
+    try {
+        let def = []
+        def.push(`    export class ${name}`)
+        if (klass.$['parent']) 
+            def.push(` extends ${klass.$['parent']}`)
+        def.push(' {')
+        out.push(def.join(''))
+
+        /**
+         * Static methods (functions)
+         */
+        if (klass.function) {
+            for (let func of klass.function) {
+                if (func.$['name'] === "new") continue // Use standard constructor
+                if (func.$['name'] === "newv") continue // FIXME!
+                let line = []
+                // if (pt && pt[method.$['name']]) {
+                //     out.push('        '+pt[method.$['name']])
+                // } else {
+                    line.push(`        static ${func.$['name']}(`)
+                    if (func.parameters) {
+                        if (func.parameters[0].parameter)
+                            for (let parameter of func.parameters[0].parameter) {
+                                let name = getName(parameter.$['name'])
+                                if (name === '...') name = '...args'
+                                line.push(`${name}: ${getType(modName, parameter)}`)
+                                line.push(', ')
+                            }
+                    }
+                    if (line[line.length-1] === ', ')
+                        line[line.length-1] = ")"
+                    else
+                        line.push(')')
+                    line.push(getReturnType(modName, func))
+                // }
+                out.push(line.join(''))
+            }
+            
+        }
+        /**
+         * Constructors
+         */
+        if (klass.constructor[0]) {
+            out.push("        constructor(config?: any)")
+            for (let ctor in klass.constructor) {
+                let constructor = klass.constructor[ctor]
+                if (typeof constructor === 'object') {
+                    if (constructor.$['name'] === 'new') continue
+                    let line = []
+                    if (pt && pt[constructor.$['name']]) {
+                        out.push('        '+pt[constructor.$['name']])
+                    } else {
+                        line.push(`        static ${constructor.$['name']}(`)
+                        if (constructor.parameters) {
+                            for (let parameter of constructor.parameters[0].parameter) {
+                                let name = getName(parameter.$['name'])
+                                if (name === '...') name = '...args'
+                                line.push(`${name}: ${getType(modName, parameter)}`)
+                                line.push(', ')
+                            }
+                        }
+                        if (line[line.length-1] === ', ')
+                            line[line.length-1] = `):${name}`
+                        else
+                            line.push(`):${name}`)
+                    }
+                    out.push(line.join(''))
+                }
+            }
+
+        }
+
+        // if (name === "Object") {
+        //     console.log(name + " "+ JSON.stringify(ad, null, 2))
+        // }
+        // if (name === "Settings") {
+        //     console.log(name + " "+ JSON.stringify(ad, null, 2))
+        // }
+        if (ad) {
+            for (let mn in ad) {
+                out.push('        '+ad[mn])
+            }
+
+        }
+
+        /**
+         * Methods
+         */
+        if (klass.method) {
+            for (let method of klass.method) {
+                let line = []
+                if (pt && pt[method.$['name']]) {
+                    out.push('        '+pt[method.$['name']])
+                } else {
+                    line.push(`        ${method.$['name']}(`)
+                    if (method.parameters) {
+                        if (method.parameters[0].parameter)
+                            for (let parameter of method.parameters[0].parameter) {
+                                let name = getName(parameter.$['name'])
+                                if (name === '...') name = '...args'
+                                line.push(`${name}: ${getType(modName, parameter)}`)
+                                line.push(', ')
+                            }
+                    }
+                    if (line[line.length-1] === ', ')
+                        line[line.length-1] = ")"
+                    else
+                        line.push(')')
+                    line.push(getReturnType(modName, method))
+                }
+                out.push(line.join(''))
+            }
+        }
+
+        /* Class properties */
+        if (klass.property) {
+            for (let prop of klass.property) {
+                    let prop_name = prop.$['name'];
+                let writable = prop.$['writable'];
+                let type = getType(modName, prop);
+
+                let line = ['        '];
+                if (!writable) line.push('readonly ');
+                line.push(prop_name.replace(/-/g, '_'));
+                line.push(': ');
+                line.push(type);
+                line.push(';');
+
+                out.push(line.join(''));
+                // console.log(`${name}.` + line.join(''));
+            }
+        }
+        
+        out.push('    }')
+    } catch (e) {
+        console.log(e.message)
+    }
+}
 
 function addGirInfo(modName, gir, patch, add, out) {
 
@@ -191,147 +338,12 @@ function addGirInfo(modName, gir, patch, add, out) {
 
     // Get the requested classes
     if (ns.class)
-        for (let klass of ns.class) {
-            let name = klass.$['name']
-            let pt = patch ? patch[name] : null
-            let ad = add ? add[name] : null
-            try {
-                let def = []
-                def.push(`    export class ${name}`)
-                if (klass.$['parent']) 
-                    def.push(` extends ${klass.$['parent']}`)
-                def.push(' {')
-                out.push(def.join(''))
+        for (let klass of ns.class)
+            addGirInfoForClass(modName, patch, add, klass, out);
 
-                /**
-                 * Static methods (functions)
-                 */
-                if (klass.function) {
-                    for (let func of klass.function) {
-                        if (func.$['name'] === "new") continue // Use standard constructor
-                        if (func.$['name'] === "newv") continue // FIXME!
-                        let line = []
-                        // if (pt && pt[method.$['name']]) {
-                        //     out.push('        '+pt[method.$['name']])
-                        // } else {
-                            line.push(`        static ${func.$['name']}(`)
-                            if (func.parameters) {
-                                if (func.parameters[0].parameter)
-                                    for (let parameter of func.parameters[0].parameter) {
-                                        let name = getName(parameter.$['name'])
-                                        if (name === '...') name = '...args'
-                                        line.push(`${name}: ${getType(modName, parameter)}`)
-                                        line.push(', ')
-                                    }
-                            }
-                            if (line[line.length-1] === ', ')
-                                line[line.length-1] = ")"
-                            else
-                                line.push(')')
-                            line.push(getReturnType(modName, func))
-                        // }
-                        out.push(line.join(''))
-                    }
-                    
-                }
-                /**
-                 * Constructors
-                 */
-                if (klass.constructor[0]) {
-                    out.push("        constructor(config?: any)")
-                    for (let ctor in klass.constructor) {
-                        let constructor = klass.constructor[ctor]
-                        if (typeof constructor === 'object') {
-                            if (constructor.$['name'] === 'new') continue
-                            let line = []
-                            if (pt && pt[constructor.$['name']]) {
-                                out.push('        '+pt[constructor.$['name']])
-                            } else {
-                                line.push(`        static ${constructor.$['name']}(`)
-                                if (constructor.parameters) {
-                                    for (let parameter of constructor.parameters[0].parameter) {
-                                        let name = getName(parameter.$['name'])
-                                        if (name === '...') name = '...args'
-                                        line.push(`${name}: ${getType(modName, parameter)}`)
-                                        line.push(', ')
-                                    }
-                                }
-                                if (line[line.length-1] === ', ')
-                                    line[line.length-1] = `):${name}`
-                                else
-                                    line.push(`):${name}`)
-                            }
-                            out.push(line.join(''))
-                        }
-                    }
-
-                }
-
-                // if (name === "Object") {
-                //     console.log(name + " "+ JSON.stringify(ad, null, 2))
-                // }
-                // if (name === "Settings") {
-                //     console.log(name + " "+ JSON.stringify(ad, null, 2))
-                // }
-                if (ad) {
-                    for (let mn in ad) {
-                        out.push('        '+ad[mn])
-                    }
-
-                }
-
-                /**
-                 * Methods
-                 */
-                if (klass.method) {
-                    for (let method of klass.method) {
-                        let line = []
-                        if (pt && pt[method.$['name']]) {
-                            out.push('        '+pt[method.$['name']])
-                        } else {
-                            line.push(`        ${method.$['name']}(`)
-                            if (method.parameters) {
-                                if (method.parameters[0].parameter)
-                                    for (let parameter of method.parameters[0].parameter) {
-                                        let name = getName(parameter.$['name'])
-                                        if (name === '...') name = '...args'
-                                        line.push(`${name}: ${getType(modName, parameter)}`)
-                                        line.push(', ')
-                                    }
-                            }
-                            if (line[line.length-1] === ', ')
-                                line[line.length-1] = ")"
-                            else
-                                line.push(')')
-                            line.push(getReturnType(modName, method))
-                        }
-                        out.push(line.join(''))
-                    }
-                }
-
-                if (klass.property) {
-                    for (let prop of klass.property) {
-                        let prop_name = prop.$['name'];
-                        let writable = prop.$['writable'];
-                        let type = getType(modName, prop);
-
-                        let line = ['        '];
-                        if (!writable) line.push('readonly ');
-                        line.push(prop_name.replace(/-/g, '_'));
-                        line.push(': ');
-                        line.push(type);
-                        line.push(';');
-
-                        out.push(line.join(''));
-                        // console.log(`${name}.` + line.join(''));
-                    }
-                }
-                
-                out.push('    }')
-            } catch (e) {
-                console.log(e.message)
-            }
-        }
+    if (ns.record)
+        for (let klass of ns.record)
+            addGirInfoForClass(modName, patch, add, klass, out);
         
     return out.join("\n")
 }
