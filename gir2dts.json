@@ -64,26 +64,17 @@
             "source": "/usr/share/gir-1.0/Gtk-3.0.gir",
             "output": "src/Gtk.d.ts",
             "import": ["GObject", "GLib", "Gio", "Gdk", "Atk","Pango"],
-            "add": {
-                "Application": {
-                    "add_action": "add_action(action: any)"
-                },
-                "FileChooserDialog": {
-                    "set_select_multiple": "set_select_multiple(select: boolean)"
-                },
-                "ListStore": {
-                    "get_value": "get_value(iter: any, index: number): any"
-                },
-                "Settings": {
-                    "gtk_application_prefer_dark_theme": "gtk_application_prefer_dark_theme: boolean",
-                    "gtk_theme_name": "gtk_theme_name: string"
-                    
-                }
-            },
             "patch" : {
                 "AppChooserWidget": {
-                    "show-all": ""
+                    "show-all": "/* show-all */"
                 },
+                "MountOperation": {
+                    "is-showing": "/* is-showing */"
+                },
+                "SeparatorToolItem": {
+                    "draw": "/* draw */"
+                },
+
                 "Bin": {
                     "mnemonic_activate": "mnemonic_activate(...args: any[]):boolean"
                 },
@@ -189,10 +180,18 @@
                     "get_direction": "get_direction(): number",
                     "set_direction": "set_direction(dir: number):void",
                     "set_state": "set_state(state: number)",
-                    "set_style": "set_style(style: number)"
+                    "set_style": "set_style(style: number)",
+
+                    "has-default": "/* has-default */",
+                    "has-focus": "/* has-focus */",
+                    "is-focus": "/* is-focus */"
                 },
                 "Window": {
-                    "mnemonic_activate": "mnemonic_activate(...args: any[]):boolean"
+                    "mnemonic_activate": "mnemonic_activate(...args: any[]):boolean",
+
+                    "has-toplevel-focus": "/* has-toplevel-focus */",
+                    "is-active": "/* is-active */",
+                    "is-maximized": "/* is-maximized */"
                 }
             }
         },
