@@ -52,7 +52,13 @@
         "GtkSource": {
             "source": "/usr/share/gir-1.0/GtkSource-3.0.gir",
             "output": "src/GtkSource.d.ts",
-            "import": ["GObject", "Gio", "Gdk", "Gtk", "GLib", "Pango"]
+            "import": ["GObject", "Gio", "Gdk", "Gtk", "GLib", "Pango"],
+            "patch": {
+                "Buffer": {
+                    "can-redo": "/* can-redo */",
+                    "can-undo": "/* can-undo */"
+                }
+            }
         },
         "Gtk": {
             "source": "/usr/share/gir-1.0/Gtk-3.0.gir",
