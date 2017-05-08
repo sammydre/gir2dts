@@ -207,6 +207,14 @@
             "patch": {
                 "Message": {
                     "set_response": "set_response(content_type: string, resp_use: MemoryUse, resp_body: string, resp_length: number):void"
+                },
+                "Auth": {
+                    "is-authenticated": "/* is-authenticated */",
+                    "is-for-proxy": "/* is-for-proxy */"
+                },
+                "AuthDomain": {
+                    "add-path": "/* add-path */",
+                    "remove-path": "/* remove-path */"
                 }
             }
         },

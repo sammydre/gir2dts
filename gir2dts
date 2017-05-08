@@ -288,7 +288,12 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                 let prop_name = prop.$['name'];
 
                 if (pt && typeof pt[prop_name] != 'undefined') {
-                    out.push('        '+pt[prop_name])
+                        out.push('        '+pt[prop_name])
+                    continue
+                }
+
+                if (typeof prop.$['introspectable'] != 'undefined' &&
+                        prop.$['introspectable'] == '0') {
                     continue
                 }
 
