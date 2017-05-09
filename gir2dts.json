@@ -3,7 +3,7 @@
         "Atk": {
             "source": "/usr/share/gir-1.0/Atk-1.0.gir",
             "output": "src/Atk.d.ts",
-            "import": ["GObject"]
+            "import": ["GObject", "GLib"]
         },
         "Gda": {
             "source": "/usr/share/gir-1.0/Gda-5.0.gir",
@@ -19,8 +19,12 @@
         "Gio": {
             "source": "/usr/share/gir-1.0/Gio-2.0.gir",
             "output": "src/Gio.d.ts",
-            "patch": "patches/gio.d.ts",
-            "import": ["GObject", "GLib"]
+            "import": ["GObject", "GLib"],
+            "patch": {
+                "IOModule": {
+                    "load": "/* load */"
+                }
+            }
         },
         "GLib": {
             "source": "/usr/share/gir-1.0/GLib-2.0.gir",
@@ -74,6 +78,18 @@
                 "SeparatorToolItem": {
                     "draw": "/* draw */"
                 },
+                "CheckButton": {
+                    "draw_indicator": "/* draw_indicator */"
+                },
+                "HandleBox": {
+                    "child-detached": "/* child-detached */"
+                },
+                "Plug": {
+                    "embedded": "/* embedded */"
+                },
+                "Scale": {
+                    "draw-value": "/* draw-value */"
+                },
 
                 "Bin": {
                     "mnemonic_activate": "mnemonic_activate(...args: any[]):boolean"
@@ -81,9 +97,6 @@
                 "Container": {
                     "remove" : "remove(...args: any[]):void",
                     "child_notify": "child_notify(...args: any[]):void"
-                },
-                "CheckButton": {
-                    "new_with_label": "static new_with_label(...args: any[]):CheckButton"
                 },
                 "CheckMenuItem": {
                     "new_with_label": "static new_with_label(...args: any[]):CheckMenuItem"

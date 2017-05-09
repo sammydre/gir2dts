@@ -82,6 +82,11 @@ function getSymbols(module, gir) {
             let name = klass.$['name']
             sym[`${module}.${name}`] = `${module}.${name}`
         }
+    if (ns.interface)
+        for (let klass of ns.interface) {
+            let name = klass.$['name']
+            sym[`${module}.${name}`] = `${module}.${name}`
+        }
     if (ns.record)
         for (let klass of ns.record) {
             let name = klass.$['name']
@@ -140,6 +145,51 @@ function addDocumentation(obj, indent, out) {
         line.push(' */');
         out.push(line.join(''));
     } 
+}
+
+function addGirInfoForClassMethod(modName, pt, method, methods, out) {
+    let method_name = method.$['name']
+
+    if (typeof method.$['introspectable'] != 'undefined' &&
+        (method.$['introspectable']) == "0") {
+        return;
+    }
+
+    if (!method_name) {
+        method_name = method.$['moved-to'];
+    }
+    if (!method_name) {
+        return;
+    }
+
+    if (typeof methods[method_name] != 'undefined') {
+        return;
+    }
+    methods[method_name] = 1
+
+    addDocumentation(method, '        ', out);                
+
+    let line = []
+    if (pt && pt[method_name]) {
+        out.push('        '+pt[method_name])
+    } else {
+        line.push(`        ${method_name}(`)
+            if (method.parameters) {
+                if (method.parameters[0].parameter)
+                    for (let parameter of method.parameters[0].parameter) {
+                        let name = getName(parameter.$['name'])
+                        if (name === '...') name = '...args'
+                        line.push(`${name}: ${getType(modName, parameter)}`)
+                        line.push(', ')
+                    }
+            }
+            if (line[line.length-1] === ', ')
+            line[line.length-1] = ")"
+            else
+            line.push(')')
+            line.push(getReturnType(modName, method))
+        }
+    out.push(line.join(''))
 }
 
 function addGirInfoForClass(modName, patch, add, klass, out) {
@@ -239,46 +289,17 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
         /**
          * Methods
          */
+        let methods = {}
+
         if (klass.method) {
             for (let method of klass.method) {
-                let method_name = method.$['name']
+                addGirInfoForClassMethod(modName, pt, method, methods, out)
+            }
+        }
 
-                if (typeof method.$['introspectable'] != 'undefined' &&
-                        (method.$['introspectable']) == "0") {
-                    console.log('skip ' + method_name);;
-                    continue;
-                }
-
-                if (!method_name) {
-                    method_name = method.$['moved-to'];
-                }
-                if (!method_name) {
-                    continue;
-                }
-
-                addDocumentation(method, '        ', out);                
-
-                let line = []
-                if (pt && pt[method_name]) {
-                    out.push('        '+pt[method_name])
-                } else {
-                    line.push(`        ${method_name}(`)
-                    if (method.parameters) {
-                        if (method.parameters[0].parameter)
-                            for (let parameter of method.parameters[0].parameter) {
-                                let name = getName(parameter.$['name'])
-                                if (name === '...') name = '...args'
-                                line.push(`${name}: ${getType(modName, parameter)}`)
-                                line.push(', ')
-                            }
-                    }
-                    if (line[line.length-1] === ', ')
-                        line[line.length-1] = ")"
-                    else
-                        line.push(')')
-                    line.push(getReturnType(modName, method))
-                }
-                out.push(line.join(''))
+        if (klass['virtual-method']) {
+            for (let method of klass['virtual-method']) {
+                addGirInfoForClassMethod(modName, pt, method, methods, out)
             }
         }
 
@@ -344,7 +365,19 @@ function addGirInfo(modName, gir, patch, add, out) {
                         for (let parameter of func.parameters[0].parameter) {
                             let name = getName(parameter.$['name'])
                             if (name === '...') name = '...args'
-                            def.push(`${name}: ${getType(modName, parameter)}`)
+
+                            let nullable = '';
+                            let defaultval = '';
+
+                            if ((typeof parameter.$['nullable'] &&
+                                 parameter.$['nullable']) ||
+                                (typeof parameter.$['allow-none'] &&
+                                 parameter.$['allow-none'])) {
+                                nullable = ' | null';
+                                defaultval = '= null'
+                            }
+
+                            def.push(`${name}: ${getType(modName, parameter)}${nullable}`)
                             def.push(', ')
                         }
                 }
@@ -400,6 +433,10 @@ function addGirInfo(modName, gir, patch, add, out) {
     // Get the requested classes
     if (ns.class)
         for (let klass of ns.class)
+            addGirInfoForClass(modName, patch, add, klass, out);
+
+    if (ns.interface)
+        for (let klass of ns.interface)
             addGirInfoForClass(modName, patch, add, klass, out);
 
     if (ns.record)
