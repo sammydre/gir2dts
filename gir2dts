@@ -147,6 +147,25 @@ function addDocumentation(obj, indent, out) {
     } 
 }
 
+function addGirInfoForFunctionParameters(modName, parameters, line) {
+    for (let parameter of parameters) {
+        let name = getName(parameter.$['name'])
+        if (name === '...') name = '...args'
+
+        let nullable = '';
+
+        if ((typeof parameter.$['nullable'] != 'undefined' &&
+                parseInt(parameter.$['nullable'])) ||
+            (typeof parameter.$['allow-none'] != 'undefined' &&
+                parseInt(parameter.$['allow-none']))) {
+            nullable = ' | null';
+        }
+
+        line.push(`${name}: ${getType(modName, parameter)}${nullable}`)
+        line.push(', ')
+    }
+}
+
 function addGirInfoForClassMethod(modName, pt, method, methods, out) {
     let method_name = method.$['name']
 
@@ -176,12 +195,7 @@ function addGirInfoForClassMethod(modName, pt, method, methods, out) {
         line.push(`        ${method_name}(`)
             if (method.parameters) {
                 if (method.parameters[0].parameter)
-                    for (let parameter of method.parameters[0].parameter) {
-                        let name = getName(parameter.$['name'])
-                        if (name === '...') name = '...args'
-                        line.push(`${name}: ${getType(modName, parameter)}`)
-                        line.push(', ')
-                    }
+                    addGirInfoForFunctionParameters(modName, method.parameters[0].parameter, line)
             }
             if (line[line.length-1] === ', ')
             line[line.length-1] = ")"
@@ -221,12 +235,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                     line.push(`        static ${func_name}(`)
                     if (func.parameters) {
                         if (func.parameters[0].parameter)
-                            for (let parameter of func.parameters[0].parameter) {
-                                let name = getName(parameter.$['name'])
-                                if (name === '...') name = '...args'
-                                line.push(`${name}: ${getType(modName, parameter)}`)
-                                line.push(', ')
-                            }
+                            addGirInfoForFunctionParameters(modName, func.parameters[0].parameter, line)
                     }
                     if (line[line.length-1] === ', ')
                         line[line.length-1] = ")"
@@ -362,24 +371,7 @@ function addGirInfo(modName, gir, patch, add, out) {
                 def.push(`    export function ${name}(`)
                 if (func.parameters) {
                     if (func.parameters[0].parameter)
-                        for (let parameter of func.parameters[0].parameter) {
-                            let name = getName(parameter.$['name'])
-                            if (name === '...') name = '...args'
-
-                            let nullable = '';
-                            let defaultval = '';
-
-                            if ((typeof parameter.$['nullable'] &&
-                                 parameter.$['nullable']) ||
-                                (typeof parameter.$['allow-none'] &&
-                                 parameter.$['allow-none'])) {
-                                nullable = ' | null';
-                                defaultval = '= null'
-                            }
-
-                            def.push(`${name}: ${getType(modName, parameter)}${nullable}`)
-                            def.push(', ')
-                        }
+                        addGirInfoForFunctionParameters(modName, func.parameters[0].parameter, def)
                 }
                 if (def[def.length-1] === ', ')
                     def[def.length-1] = ")"
