@@ -253,29 +253,30 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
          * Constructors
          */
         if (klass.constructor[0]) {
-            out.push("        constructor(config?: any)")
+            out.push("        constructor(config: object)")
             for (let ctor in klass.constructor) {
                 let constructor = klass.constructor[ctor]
                 if (typeof constructor === 'object') {
-                    if (constructor.$['name'] === 'new') continue
                     let line = []
+                    let return_type = ''
                     if (pt && pt[constructor.$['name']]) {
                         out.push('        '+pt[constructor.$['name']])
+                        continue
+                    } else if (constructor.$['name'] === 'new') {
+                        line.push("        constructor(")
                     } else {
                         line.push(`        static ${constructor.$['name']}(`)
-                        if (constructor.parameters) {
-                            for (let parameter of constructor.parameters[0].parameter) {
-                                let name = getName(parameter.$['name'])
-                                if (name === '...') name = '...args'
-                                line.push(`${name}: ${getType(modName, parameter)}`)
-                                line.push(', ')
-                            }
-                        }
-                        if (line[line.length-1] === ', ')
-                            line[line.length-1] = `):${name}`
-                        else
-                            line.push(`):${name}`)
+                        return_type = ":" + name
                     }
+
+                    if (constructor.parameters) {
+                        addGirInfoForFunctionParameters(modName, constructor.parameters[0].parameter, line)
+                    }
+                    if (line[line.length-1] === ', ')
+                        line[line.length-1] = `)${return_type}`
+                    else
+                        line.push(`)${return_type}`)
+                    
                     out.push(line.join(''))
                 }
             }
