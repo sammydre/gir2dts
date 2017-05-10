@@ -206,11 +206,45 @@ function addGirInfoForClassMethod(modName, pt, method, methods, out) {
     out.push(line.join(''))
 }
 
+function addGirInfoForClassProperty(modName, pt, prop, properties, out) {
+    let prop_name = prop.$['name'];
+
+    if (pt && typeof pt[prop_name] != 'undefined') {
+            out.push('        '+pt[prop_name])
+        return
+    }
+
+    if (typeof prop.$['introspectable'] != 'undefined' &&
+            prop.$['introspectable'] == '0') {
+        return
+    }
+
+    let writable = prop.$['writable'];
+    let type = getType(modName, prop);
+    let safe_name = prop_name.replace(/-/g, '_');
+
+    let line = [];
+    line.push('        ');
+    if (!writable) line.push('readonly ');
+    line.push(safe_name);
+    line.push(': ');
+    line.push(type);
+    line.push(';');
+
+    addDocumentation(prop, '        ', out);
+    out.push(line.join(''));
+
+    if (properties)
+        properties[safe_name] = 1
+}
+
 function addGirInfoForClass(modName, patch, add, klass, out) {
     let name = klass.$['name']
     let pt = patch ? patch[name] : null
     let ad = add ? add[name] : null
     try {
+        let properties = {}
+
         // Make an interface for the properties of this class, extending as the normal
         // class does. We use this for typing the generic constructor.
         if (true) {
@@ -221,11 +255,9 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
             def.push(' {')
             out.push(def.join(''))
 
-            // TODO: all properties here. share code with below.
             if (klass.property) {
                 for (let prop of klass.property) {
-                    let prop_name = prop.$['name'];
-                    out.push(`        // ${prop_name}`)
+                    addGirInfoForClassProperty(modName, pt, prop, properties, out)
                 }
             }
 
@@ -322,6 +354,8 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
          */
         let methods = {}
 
+        // TODO: only add method if the name is not already in properties (?)
+
         if (klass.method) {
             for (let method of klass.method) {
                 addGirInfoForClassMethod(modName, pt, method, methods, out)
@@ -337,31 +371,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
         /* Class properties */
         if (klass.property) {
             for (let prop of klass.property) {
-                let prop_name = prop.$['name'];
-
-                if (pt && typeof pt[prop_name] != 'undefined') {
-                        out.push('        '+pt[prop_name])
-                    continue
-                }
-
-                if (typeof prop.$['introspectable'] != 'undefined' &&
-                        prop.$['introspectable'] == '0') {
-                    continue
-                }
-
-                let writable = prop.$['writable'];
-                let type = getType(modName, prop);
-
-                let line = [];
-                line.push('        ');
-                if (!writable) line.push('readonly ');
-                line.push(prop_name.replace(/-/g, '_'));
-                line.push(': ');
-                line.push(type);
-                line.push(';');
-
-                addDocumentation(prop, '        ', out);
-                out.push(line.join(''));
+                addGirInfoForClassProperty(modName, pt, prop, null, out)
             }
         }
         
