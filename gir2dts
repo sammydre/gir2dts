@@ -193,16 +193,16 @@ function addGirInfoForClassMethod(modName, pt, method, methods, out) {
         out.push('        '+pt[method_name])
     } else {
         line.push(`        ${method_name}(`)
-            if (method.parameters) {
-                if (method.parameters[0].parameter)
-                    addGirInfoForFunctionParameters(modName, method.parameters[0].parameter, line)
-            }
-            if (line[line.length-1] === ', ')
-            line[line.length-1] = ")"
-            else
-            line.push(')')
-            line.push(getReturnType(modName, method))
+        if (method.parameters) {
+            if (method.parameters[0].parameter)
+                addGirInfoForFunctionParameters(modName, method.parameters[0].parameter, line)
         }
+        if (line[line.length-1] === ', ')
+            line[line.length-1] = ")"
+        else
+            line.push(')')
+        line.push(getReturnType(modName, method))
+    }
     out.push(line.join(''))
 }
 
@@ -239,6 +239,20 @@ function addGirInfoForClassProperty(modName, pt, prop, optional, properties, out
         properties[safe_name] = 1
 }
 
+function addGirInfoForSignalReturn(modName, sig, out) {
+    out.push(`((`)
+    if (sig.parameters) {
+        if (sig.parameters[0].parameter)
+            addGirInfoForFunctionParameters(modName, sig.parameters[0].parameter, out)
+    }
+    if (out[out.length-1] === ', ')
+        out[out.length-1] = ")"
+    else
+        out.push(')')
+    out.push(getReturnTypeArrow(modName, sig))
+    out.push(')')
+}
+
 function addGirInfoForClass(modName, patch, add, klass, out) {
     let name = klass.$['name']
     let pt = patch ? patch[name] : null
@@ -263,6 +277,29 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                     let sigName = sig.$['name'];
                     line.push(`"${sigName}"`)
                     line.push(" | ")
+                    pushed = true
+                }
+                if (pushed)
+                    line.pop()
+            } else {
+                line.push('null')
+            }
+
+            out.push(line.join(''))
+
+            line = []
+
+            line.push(`    type ${name}_SignalTypes = `)
+            if (parent) {
+                line.push(`${parent}_SignalTypes | `)
+            }
+            if (klass['glib:signal']) {
+                let pushed = false
+                for (let sig of klass['glib:signal']) {
+                    line.push(`(`)
+                    addGirInfoForSignalReturn(modName, sig, line)
+                    line.push(')')
+                    line.push(' | ')
                     pushed = true
                 }
                 if (pushed)
@@ -409,20 +446,22 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
         if (klass['glib:signal']) {
             // Need signals of superclass too... Ugh
             for (let sig of klass['glib:signal']) {
+                addDocumentation(sig, '        ', out)
+
                 let sigName = sig.$['name'];
 
                 let line = []
                 line.push('        ')
                 line.push('connect(sigName: "')
                 line.push(sigName)
-                line.push('", ')
-
-                line.push("func: any): void")
+                line.push('", callback: ')
+                addGirInfoForSignalReturn(modName, sig, line)
+                line.push("): void")
 
                 out.push(line.join(''))
             }
 
-            out.push(`        connect(sigName: ${name}_SignalNames, func: any): void`)
+            out.push(`        connect(sigName: ${name}_SignalNames, func: ${name}_SignalTypes): void`)
         }
         
         out.push('    }')
@@ -530,6 +569,8 @@ function getName(name) {
         case 'break': return 'break_'
         case 'arguments': return 'arguments_'
         case 'eval': return 'eval_'
+        case 'default': return 'default_'
+        case 'new': return 'new_'
     }
     return name
 }
@@ -600,5 +641,10 @@ function getReturnType(modName, method) {
     if (method['return-value']) {
         return ':'+getType(modName, method['return-value'][0])
     } else return ''
+}
 
+function getReturnTypeArrow(modName, method) {
+    if (method['return-value']) {
+        return ' => '+getType(modName, method['return-value'][0])
+    } else return ''
 }
