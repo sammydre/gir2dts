@@ -92,6 +92,12 @@ function getSymbols(module, gir) {
             let name = klass.$['name']
             sym[`${module}.${name}`] = `${module}.${name}`
         }
+    if (ns.callback)
+        for (let klass of ns.callback) {
+            let name = klass.$['name']
+            sym[`${module}.${name}`] = `${module}.${name}`
+        }
+
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 // pass 2 - process each file
@@ -506,6 +512,33 @@ function addGirInfo(modName, gir, patch, add, out) {
             }
         }
 
+    // Get the requested callbacks
+    if (ns.callback)
+        for (let cb of ns.callback) {
+            let cbName = getName(cb.$['name'])
+
+            try {
+                addDocumentation(cb, '    ', out);
+                out.push(`    export interface ${cbName} {`)
+
+                let def = []
+                
+                def.push('        (')
+                if (cb.parameters) {
+                    if (cb.parameters[0].parameter)
+                        addGirInfoForFunctionParameters(modName, cb.parameters[0].parameter, def)
+                }
+                if (def[def.length-1] === ', ')
+                    def[def.length-1] = ")"
+                else
+                    def.push(')')
+                def.push(getReturnType(modName, cb))
+                out.push(def.join(''))
+                out.push('    }')
+            } catch (e) {
+                console.log(e.message)
+            }
+        }
 
     // Get the requested enums        
     if (ns.enumeration)
@@ -584,7 +617,7 @@ function getType(modName, parameter) {
         if (parameter.array[0].type) {
             name = parameter.array[0].type[0].$['name']
         }
-    } else if (parameter.type && parameter.type[0].$) {
+    } else if (parameter.type && parameter.type[0].$ && parameter.type[0].$['name']) {
         name = parameter.type[0].$['name']
     } else {
         return 'any';
