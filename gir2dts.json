@@ -23,7 +23,14 @@
             "patch": {
                 "IOModule": {
                     "load": "/* load */"
+                },
+                "Socket": {
+                    "connect": "/* connect */"
+                },
+                "SocketConnection": {
+                    "connect": "/* connect */"
                 }
+                
             }
         },
         "GLib": {

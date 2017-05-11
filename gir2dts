@@ -246,6 +246,34 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
     try {
         let properties = {}
 
+        let parent = null;
+        if (klass.$['parent']) {
+            parent = klass.$['parent'];
+        }
+
+        if (true) {
+            let line = []
+            line.push(`    type ${name}_SignalNames = `)
+            if (parent) {
+                line.push(`${parent}_SignalNames | `)
+            }
+            if (klass['glib:signal']) {
+                let pushed = false
+                for (let sig of klass['glib:signal']) {
+                    let sigName = sig.$['name'];
+                    line.push(`"${sigName}"`)
+                    line.push(" | ")
+                    pushed = true
+                }
+                if (pushed)
+                    line.pop()
+            } else {
+                line.push('null')
+            }
+
+            out.push(line.join(''))
+        }
+
         // Make an interface for the properties of this class, extending as the normal
         // class does. We use this for typing the generic constructor.
         if (true) {
@@ -303,6 +331,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                 }
             }
         }
+
         /**
          * Constructors
          */
@@ -374,6 +403,26 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
             for (let prop of klass.property) {
                 addGirInfoForClassProperty(modName, pt, prop, false, null, out)
             }
+        }
+
+        /* Signals */
+        if (klass['glib:signal']) {
+            // Need signals of superclass too... Ugh
+            for (let sig of klass['glib:signal']) {
+                let sigName = sig.$['name'];
+
+                let line = []
+                line.push('        ')
+                line.push('connect(sigName: "')
+                line.push(sigName)
+                line.push('", ')
+
+                line.push("func: any): void")
+
+                out.push(line.join(''))
+            }
+
+            out.push(`        connect(sigName: ${name}_SignalNames, func: any): void`)
         }
         
         out.push('    }')

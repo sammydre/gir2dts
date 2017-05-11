@@ -2,12 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug",
-            "type": "lldb",
+            "type": "node",
             "request": "launch",
-            "cwd": "${workspaceRoot}",
-            "program": "/usr/bin/gjs",
-            "args": ["./index.js"]
+            "name": "Launch Program",
+            "program": "${workspaceRoot}/gir2dts"
         }
     ]
 }
