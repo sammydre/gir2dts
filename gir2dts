@@ -206,7 +206,7 @@ function addGirInfoForClassMethod(modName, pt, method, methods, out) {
     out.push(line.join(''))
 }
 
-function addGirInfoForClassProperty(modName, pt, prop, properties, out) {
+function addGirInfoForClassProperty(modName, pt, prop, optional, properties, out) {
     let prop_name = prop.$['name'];
 
     if (pt && typeof pt[prop_name] != 'undefined') {
@@ -227,6 +227,7 @@ function addGirInfoForClassProperty(modName, pt, prop, properties, out) {
     line.push('        ');
     if (!writable) line.push('readonly ');
     line.push(safe_name);
+    if (optional) line.push('?');
     line.push(': ');
     line.push(type);
     line.push(';');
@@ -257,7 +258,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
 
             if (klass.property) {
                 for (let prop of klass.property) {
-                    addGirInfoForClassProperty(modName, pt, prop, properties, out)
+                    addGirInfoForClassProperty(modName, pt, prop, true, properties, out)
                 }
             }
 
@@ -371,7 +372,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
         /* Class properties */
         if (klass.property) {
             for (let prop of klass.property) {
-                addGirInfoForClassProperty(modName, pt, prop, null, out)
+                addGirInfoForClassProperty(modName, pt, prop, false, null, out)
             }
         }
         
