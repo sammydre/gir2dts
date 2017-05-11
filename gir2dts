@@ -130,6 +130,32 @@ function generateModule(name, gir, module) {
         .replace(/argc\: number, argv\: string\[\]/g, "argv:string[]")
 }
 
+function gtkDocToJsDoc(doc) {
+    let ret = [];
+
+    // Things to fix: &lt; and other entities
+    // What to do with C code samples?
+    // What to do with links?
+
+    // https://developer.gnome.org/gtk-doc-manual/unstable/documenting_syntax.html.en
+
+    for (let line of doc.split(/\n/g)) {
+        for (let word of doc.split(/ /g)) {
+            if (word[0] in ['#', '%', '@']) {
+                ret.push(word.substring(1));
+            } else {
+                ret.push(word);
+            }
+            ret.push(' ');
+        }
+        if (ret[ret.length-1] == ' ') ret.pop();
+        ret.push('\n');
+    }
+    if (ret[ret.length-1] == '\n') ret.pop();
+
+    return ret.join('');
+}
+
 function addDocumentation(obj, indent, out) {
     // TODO: make docs optional
     return;
@@ -141,11 +167,11 @@ function addDocumentation(obj, indent, out) {
         let line = [];
         line.push(indent);
         line.push('/** ');
-        line.push(doc[0]._);
+        line.push(gtkDocToJsDoc(doc[0]._));
 
         if (doc_dep) {
             line.push('\n\n');
-            line.push(doc_dep[0]._);
+            line.push(gtkDocToJsDoc(doc_dep[0]._));
         }
 
         line.push(' */');
