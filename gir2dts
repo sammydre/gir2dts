@@ -461,7 +461,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                 out.push(line.join(''))
             }
 
-            out.push(`        connect(sigName: ${name}_SignalNames, func: ${name}_SignalTypes): void`)
+            out.push(`        connect(sigName: ${name}_SignalNames, callback: ${name}_SignalTypes): void`)
         }
         
         out.push('    }')
