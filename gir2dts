@@ -104,7 +104,7 @@ function generateModule(name, gir, module) {
     // out.push(`declare module '${name}' {`)
     if (module.import)
         for (let im of module.import)
-            out.push(`    import * as ${im} from "starleaf-gir/${im}"`)
+            out.push(`    import * as ${im} from "./${im}"`)
     switch (typeof module.patch) {
         case 'string':
             out.push(fs.readFileSync(module.patch, {encoding: 'utf8'}))
