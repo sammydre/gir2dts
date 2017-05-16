@@ -111,6 +111,9 @@ function generateModule(name, gir, module) {
     if (module.import)
         for (let im of module.import)
             out.push(`    import * as ${im} from "./${im}"`)
+
+    out.push('    import * as gjs from "../starleaf-gjs/ByteArray"')
+
     switch (typeof module.patch) {
         case 'string':
             out.push(fs.readFileSync(module.patch, {encoding: 'utf8'}))
@@ -699,6 +702,13 @@ function getType(modName, parameter) {
         name = x[0]
     else    
         name = x[1]
+
+    if (isArray) {
+        switch(name) {
+            case 'guint8': return 'gjs.ByteArray'
+            case 'gunichar': return 'string'
+        }
+    }
 
     switch(name) {
         case '':         return 'any'+isArray
