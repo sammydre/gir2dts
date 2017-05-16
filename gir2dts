@@ -179,7 +179,7 @@ function addDocumentation(obj, indent, out) {
     } 
 }
 
-function addGirInfoForFunctionParameters(modName, parameters, line) {
+function addGirInfoForFunctionParameters(modName, parameters, outParams, line, showNames=true) {
     for (let parameter of parameters) {
         let name = getName(parameter.$['name'])
         if (name === '...') name = '...args'
@@ -193,7 +193,20 @@ function addGirInfoForFunctionParameters(modName, parameters, line) {
             nullable = ' | null';
         }
 
-        line.push(`${name}: ${getType(modName, parameter)}${nullable}`)
+        if (outParams &&
+                typeof parameter.$['direction'] != 'undefined' &&
+                parameter.$['direction'] == 'out') {
+            outParams.push(parameter);
+            continue;
+        }
+
+        if (showNames) {
+            line.push(`${name}: ${getType(modName, parameter)}${nullable}`)
+        } else {
+            line.push(`/*${name}:*/ ${getType(modName, parameter)}${nullable}`)
+        }
+
+        
         line.push(', ')
     }
 }
@@ -218,22 +231,51 @@ function addGirInfoForClassMethod(modName, pt, method, methods, out) {
     }
     methods[method_name] = 1
 
-    addDocumentation(method, '        ', out);                
+    addDocumentation(method, '        ', out);   
 
     let line = []
     if (pt && pt[method_name]) {
         out.push('        '+pt[method_name])
     } else {
         line.push(`        ${method_name}(`)
+        let outParams = []
         if (method.parameters) {
             if (method.parameters[0].parameter)
-                addGirInfoForFunctionParameters(modName, method.parameters[0].parameter, line)
+                addGirInfoForFunctionParameters(modName, method.parameters[0].parameter, outParams, line)
         }
         if (line[line.length-1] === ', ')
             line[line.length-1] = ")"
         else
             line.push(')')
-        line.push(getReturnType(modName, method))
+
+        if (outParams.length > 0) {
+            let retType = getReturnType(modName, method)
+            let num = outParams.length
+            if (retType && retType != 'void') {
+                num++
+            }
+            if (num > 1) {
+                line.push(':[')
+            } else {
+                line.push(':')
+            }
+            
+            if (retType && retType != 'void') {
+                line.push(`/*returnVal:*/ ${retType}`)
+                line.push(', ')
+            }
+
+            addGirInfoForFunctionParameters(modName, outParams, null, line, false)
+
+            line.pop()
+
+            if (num > 1) {
+                line.push(']')
+            }
+        } else {
+            line.push(':')
+            line.push(getReturnType(modName, method))
+        }
     }
     out.push(line.join(''))
 }
@@ -275,7 +317,7 @@ function addGirInfoForSignalReturn(modName, sig, out) {
     out.push(`((`)
     if (sig.parameters) {
         if (sig.parameters[0].parameter)
-            addGirInfoForFunctionParameters(modName, sig.parameters[0].parameter, out)
+            addGirInfoForFunctionParameters(modName, sig.parameters[0].parameter, null, out)
     }
     if (out[out.length-1] === ', ')
         out[out.length-1] = ")"
@@ -386,12 +428,13 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                     line.push(`        static ${func_name}(`)
                     if (func.parameters) {
                         if (func.parameters[0].parameter)
-                            addGirInfoForFunctionParameters(modName, func.parameters[0].parameter, line)
+                            addGirInfoForFunctionParameters(modName, func.parameters[0].parameter, null, line)
                     }
                     if (line[line.length-1] === ', ')
                         line[line.length-1] = ")"
                     else
                         line.push(')')
+                    line.push(':')
                     line.push(getReturnType(modName, func))
                 // }
                 if (func_name) {
@@ -422,7 +465,7 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
                     }
 
                     if (constructor.parameters) {
-                        addGirInfoForFunctionParameters(modName, constructor.parameters[0].parameter, line)
+                        addGirInfoForFunctionParameters(modName, constructor.parameters[0].parameter, null, line)
                     }
                     if (line[line.length-1] === ', ')
                         line[line.length-1] = `)${return_type}`
@@ -524,12 +567,13 @@ function addGirInfo(modName, gir, patch, add, out) {
                 def.push(`    export function ${name}(`)
                 if (func.parameters) {
                     if (func.parameters[0].parameter)
-                        addGirInfoForFunctionParameters(modName, func.parameters[0].parameter, def)
+                        addGirInfoForFunctionParameters(modName, func.parameters[0].parameter, null, def)
                 }
                 if (def[def.length-1] === ', ')
                     def[def.length-1] = ")"
                 else
                     def.push(')')
+                def.push(':')
                 def.push(getReturnType(modName, func))
                 addDocumentation(func, '    ', out);
                 out.push(def.join(''))
@@ -552,12 +596,13 @@ function addGirInfo(modName, gir, patch, add, out) {
                 def.push('        (')
                 if (cb.parameters) {
                     if (cb.parameters[0].parameter)
-                        addGirInfoForFunctionParameters(modName, cb.parameters[0].parameter, def)
+                        addGirInfoForFunctionParameters(modName, cb.parameters[0].parameter, null, def)
                 }
                 if (def[def.length-1] === ', ')
                     def[def.length-1] = ")"
                 else
                     def.push(')')
+                def.push(':')
                 def.push(getReturnType(modName, cb))
                 out.push(def.join(''))
                 out.push('    }')
@@ -698,7 +743,7 @@ function getType(modName, parameter) {
 /* Process the return type */
 function getReturnType(modName, method) {
     if (method['return-value']) {
-        return ':'+getType(modName, method['return-value'][0])
+        return getType(modName, method['return-value'][0])
     } else return ''
 }
 
