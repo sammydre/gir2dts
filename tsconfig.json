@@ -18,6 +18,7 @@
     "src/Gio.d.ts",
     "src/Gda.d.ts",
     "src/Atk.d.ts",
+    "src/AppIndicator.d.ts",
     "src/gjs.d.ts",
     "src/gjs.js",
     "example/imports.ts",

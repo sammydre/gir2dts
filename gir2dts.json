@@ -1,5 +1,10 @@
 {
     "module": {
+        "AppIndicator": {
+            "source": "/usr/share/gir-1.0/AppIndicator3-0.1.gir",
+            "output": "src/AppIndicator.d.ts",
+            "import": ["GObject", "Gtk"]
+        },
         "Atk": {
             "source": "/usr/share/gir-1.0/Atk-1.0.gir",
             "output": "src/Atk.d.ts",
