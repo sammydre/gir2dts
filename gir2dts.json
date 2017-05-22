@@ -3,7 +3,7 @@
         "AppIndicator": {
             "source": "/usr/share/gir-1.0/AppIndicator3-0.1.gir",
             "output": "src/AppIndicator.d.ts",
-            "import": ["GObject", "Gtk"]
+            "import": ["GObject", "Gtk", "Gdk"]
         },
         "Atk": {
             "source": "/usr/share/gir-1.0/Atk-1.0.gir",
@@ -13,13 +13,7 @@
         "Gda": {
             "source": "/usr/share/gir-1.0/Gda-5.0.gir",
             "output": "src/Gda.d.ts",
-            "import": ["GObject", "GLib"],
-            "patch": {
-                "Connection": {
-                    "statement_execute_non_select": "statement_execute_non_select(stmt: Statement, params: Set, last_insert_row?: Set):number"
-                }
-            }
-
+            "import": ["GObject", "GLib"]
         },
         "Gio": {
             "source": "/usr/share/gir-1.0/Gio-2.0.gir",
@@ -57,7 +51,7 @@
                     "connect": "connect(...args: any[]):any",
                     "get_valist": "get_valist(...args: any[]):void",
                     "get_property": "get_property(...args: any[]):any",
-                    "newv": "static newv(...args: any[]):Object",
+                    
                     "replace_data": "replace_data(...args: any[]):any",
                     "set_property": "set_property(...args: any[]):void",
                     "set_valist": "set_valist(...args: any[]):void"
@@ -84,12 +78,56 @@
                 "AppChooserWidget": {
                     "show-all": "/* show-all */"
                 },
+                "Button": {
+                    "activate": "/* activate */"
+                },
+                "ComboBoxText": {
+                    "remove": "/* remove */"
+                },
+                "Container": {
+                    "child_notify": "/* child_notify */"
+                },
+                "Entry": {
+                    "activate": "/* activate */"
+                },
+                "Expander": {
+                    "activate": "/* activate */"
+                },
+                "FlowBoxChild": {
+                    "activate": "/* activate */"
+                },
+                "ListBoxRow": {
+                    "activate": "/* activate */"
+                },
+                "MenuButton": {
+                    "get_direction": "/* get_direction */",
+                    "set_direction": "/* set_direction */"
+                },
+                "MenuItem": {
+                    "activate": "/* activate */"
+                },
                 "MountOperation": {
                     "is-showing": "/* is-showing */"
                 },
                 "SeparatorToolItem": {
                     "draw": "/* draw */"
                 },
+                "Statusbar": {
+                    "remove": "/* remove */"
+                },
+                "StyleContext": {
+                    "get_property": "/* get_property */"
+                },
+                "StyleProperties": {
+                    "get_property": "/* get_property */",
+                    "set_property": "/* set_property */"
+                },
+                "Switch": {
+                    "activate": "/* activate */",
+                    "get_state": "/* get_state */",
+                    "set_state": "/* set_state */"
+                },
+
                 "CheckButton": {
                     "draw_indicator": "/* draw_indicator */"
                 },
@@ -102,118 +140,28 @@
                 "Scale": {
                     "draw-value": "/* draw-value */"
                 },
-
-                "Bin": {
-                    "mnemonic_activate": "mnemonic_activate(...args: any[]):boolean"
-                },
-                "Container": {
-                    "remove" : "remove(...args: any[]):void",
-                    "child_notify": "child_notify(...args: any[]):void"
-                },
-                "CheckMenuItem": {
-                    "new_with_label": "static new_with_label(...args: any[]):CheckMenuItem"
-                },
-                "ComboBoxText": {
-                    "remove" : "remove(...args: any[]):void"
-                },
-                "CssProvider": {
-                    "load_from_data": "load_from_data(...args:any[]):boolean"
-                },
-                "LinkButton": {
-                    "new_with_label": "static new_with_label(...args: any[]):LinkButton"
-                },
-                "ListStore": {
-                    "append": "append():any",
-                    "newv": "static newv(...args: any[]):ListStore",
-                    "set_column_types": "set_column_types(types: number[]):void",
-                    "set_valist": ""
-                },
-                "MenuButton": {
-                    "get_direction": "get_direction(): number",
-                    "set_direction": "set_direction(dir: number):void"
-                },
-                "MenuItem": {
-                    "activate": "activate():any"
-                },
-                "RadioButton": {
-                    "new_with_label": "static new_with_label(...args: any[]):RadioButton",
-                    "new_with_mnemonic": "static new_with_mnemonic(...args: any[]):RadioButton"
-                },
-                "RadioMenuItem": {
-                    "new_with_label": "static new_with_label(...args: any[]):RadioMenuItem",
-                    "new_with_mnemonic": "static new_with_mnemonic(...args: any[]):RadioMenuItem"
-                },
-                "RadioToolButton": {
-                    "new_with_label": "static new_with_label(...args: any[]):RadioToolButton",
-                    "new_from_stock": "static new_from_stock(...args: any[]):RadioToolButton"
-                },
-                "Statusbar": {
-                    "remove" : "remove(...args: any[]):void"
-                },
-                "Style": {
-                    "get_valist": "get_valist(...args: any[]):void"
-                },
-                "StyleContext": {
-                    "get_property": "get_property(...args: any[]):any",
-                    "get_valist": "get_valist(...args: any[]):void"
-                },
-                "StyleProperties": {
-                    "get_property": "get_property(...args: any[]):any",
-                    "get_valist": "get_valist(...args: any[]):void",
-                    "set_property": "set_property(...args: any[]):void",
-                    "set_valist": "set_valist(...args: any[]):void"
-                },
-                "Switch": {
-                    "get_state": "get_state():number",
-                    "set_state": "set_state(state: number)"
-                },
                 "TextView": {
-                    "get_window": "get_window(win?: number):Gdk.Window"
-                },
-                "TreeSelection": {
-                    "get_selected": "get_selected():any"
-                },
-                "TreeStore": {
-                    "newv": "static newv(...args: any[]):TreeStore"
+                    "get_window": "/* get_window */"
                 },
                 "ThemingEngine": {
-                    "get_property": "get_property(...args: any[]):any",
-                    "get_valist": "get_valist(...args: any[]):void"
-                },
-                "ToggleButton": {
-                    "get_direction": "get_direction(): number",
-                    "set_direction": "set_direction(dir: number):void"
-                },
-                "ToggleToolButton": {
-                    "new_from_stock": "static new_from_stock(...args: any[]):ToggleToolButton"
+                    "get_property": "/* get_property */"
                 },
                 "Toolbar": {
-                    "get_style": "get_style():number",
-                    "set_style": "set_style(style: number)"
+                    "get_style": "/* get_style */",
+                    "set_style": "/* set_style */"
                 },
                 "ToolPalette": {
-                    "get_style": "get_style():number",
-                    "set_style": "set_style(style: number)"
+                    "get_style": "/* get_style */",
+                    "set_style": "/* set_style */"
                 },
-                "Widget": {
-                    "activate": "activate():any",
-                    "child_notify": "child_notify(...args: any[]):void",
-                    "get_state": "get_state():number",
-                    "get_settings": "get_settings():any",
-                    "get_style": "get_style():number",
-                    "get_window": "get_window(win?: number):Gdk.Window",
-                    "get_direction": "get_direction(): number",
-                    "set_direction": "set_direction(dir: number):void",
-                    "set_state": "set_state(state: number)",
-                    "set_style": "set_style(style: number)",
 
+                "Widget": {
                     "has-default": "/* has-default */",
                     "has-focus": "/* has-focus */",
                     "is-focus": "/* is-focus */"
                 },
                 "Window": {
-                    "mnemonic_activate": "mnemonic_activate(...args: any[]):boolean",
-
+                    "mnemonic_activate": "/* mnemonic_activate */",
                     "has-toplevel-focus": "/* has-toplevel-focus */",
                     "is-active": "/* is-active */",
                     "is-maximized": "/* is-maximized */"
