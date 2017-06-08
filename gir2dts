@@ -618,23 +618,29 @@ function addGirInfo(modName, gir, patch, add, out) {
         for (let func of ns.function) {
             let name = getName(func.$['name'])
 
-            try {
-                let def = []
-                def.push(`    export function ${name}(`)
-                if (func.parameters) {
-                    if (func.parameters[0].parameter)
-                        addGirInfoForFunctionParameters(modName, func.parameters[0].parameter, null, def)
+            let pt = patch ? patch[name] : null
+
+            if (pt) {
+                out.push("    " + pt)
+            } else {
+                try {
+                    let def = []
+                    def.push(`    export function ${name}(`)
+                    if (func.parameters) {
+                        if (func.parameters[0].parameter)
+                            addGirInfoForFunctionParameters(modName, func.parameters[0].parameter, null, def)
+                    }
+                    if (def[def.length-1] === ', ')
+                        def[def.length-1] = ")"
+                    else
+                        def.push(')')
+                    def.push(':')
+                    def.push(getReturnType(modName, func))
+                    addDocumentation(func, '    ', out);
+                    out.push(def.join(''))
+                } catch (e) {
+                    console.log(e.message)
                 }
-                if (def[def.length-1] === ', ')
-                    def[def.length-1] = ")"
-                else
-                    def.push(')')
-                def.push(':')
-                def.push(getReturnType(modName, func))
-                addDocumentation(func, '    ', out);
-                out.push(def.join(''))
-            } catch (e) {
-                console.log(e.message)
             }
         }
 
