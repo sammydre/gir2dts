@@ -162,22 +162,22 @@
             "import": ["GObject", "Gio", "Gtk", "Soup", "GLib", "Gdk"],
             "patch": {
                 "DOMCharacterData": {
-                    "replace_data": "replace_data(...args: any[]):any"
+                    "replace_data": "/* replace_data */"
                 },
                 "DOMCSSStyleDeclaration": {
-                    "set_property": "set_property(...args: any[]):void"
+                    "set_property": "/* set_property */"
                 },
                 "DOMElement": {
-                    "remove": "remove(index?: number):void"
+                    "remove": "/* remove */"
                 },
                 "DOMHTMLSelectElement": {
-                    "remove": "remove(index?: number):void"
+                    "remove": "/* remove */"
                 },
                 "DOMObject": {
-                    "set_property": "set_property(...args: any[]):void"
+                    "set_property": "/* set_property */"
                 },
                 "WebView": {
-                    "get_settings": "get_settings():any"
+                    "get_settings": "/* get_settings */"
                 }
 
             }
