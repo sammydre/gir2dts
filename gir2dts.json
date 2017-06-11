@@ -61,7 +61,6 @@
                 }
             }
         },
-        
         "GtkSource": {
             "source": "/usr/share/gir-1.0/GtkSource-3.0.gir",
             "output": "src/GtkSource.d.ts",
@@ -81,33 +80,16 @@
                 "AppChooserWidget": {
                     "show-all": "/* show-all */"
                 },
-                "Button": {
-                    "activate": "/* activate */"
-                },
                 "ComboBoxText": {
                     "remove": "/* remove */"
                 },
                 "Container": {
                     "child_notify": "/* child_notify */"
                 },
-                "Entry": {
-                    "activate": "/* activate */"
-                },
-                "Expander": {
-                    "activate": "/* activate */"
-                },
-                "FlowBoxChild": {
-                    "activate": "/* activate */"
-                },
-                "ListBoxRow": {
-                    "activate": "/* activate */"
-                },
                 "MenuButton": {
+                    "activate": "/* activate */",
                     "get_direction": "/* get_direction */",
                     "set_direction": "/* set_direction */"
-                },
-                "MenuItem": {
-                    "activate": "/* activate */"
                 },
                 "MountOperation": {
                     "is-showing": "/* is-showing */"
@@ -126,7 +108,6 @@
                     "set_property": "/* set_property */"
                 },
                 "Switch": {
-                    "activate": "/* activate */",
                     "get_state": "/* get_state */",
                     "set_state": "/* set_state */"
                 },
