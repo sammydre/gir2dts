@@ -31,20 +31,11 @@
         },
         "GLib": {
             "source": "/usr/share/gir-1.0/GLib-2.0.gir",
-            "output": "src/GLib.d.ts",
-            "patch": {
-              "idle_add": "export function idle_add(priority: number, function_: SourceFunc, data: any):number"
-            },
-            "add": {
-                "Application": {
-                    "run": "run(argv: any)"
-                }
-            }
+            "output": "src/GLib.d.ts"
         },
         "GObject": {
             "source": "/usr/share/gir-1.0/GObject-2.0.gir",
             "output": "src/GObject.d.ts",
-            "patch": "patches/gobject.d.ts",
             "import": ["GLib"]
         },
         "GtkSource": {
