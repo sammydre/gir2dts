@@ -20,9 +20,6 @@
             "output": "src/Gio.d.ts",
             "import": ["GObject", "GLib"],
             "patch": {
-                "IOModule": {
-                    "load": "/* load */"
-                },
                 "Socket": {
                     "connect": "/* connect */"
                 },
@@ -48,18 +45,7 @@
             "source": "/usr/share/gir-1.0/GObject-2.0.gir",
             "output": "src/GObject.d.ts",
             "patch": "patches/gobject.d.ts",
-            "import": ["GLib"],
-            "add": {
-                "Object": {
-                    "connect": "connect(...args: any[]):any",
-                    "get_valist": "get_valist(...args: any[]):void",
-                    "get_property": "get_property(...args: any[]):any",
-                    
-                    "replace_data": "replace_data(...args: any[]):any",
-                    "set_property": "set_property(...args: any[]):void",
-                    "set_valist": "set_valist(...args: any[]):void"
-                }
-            }
+            "import": ["GLib"]
         },
         "GtkSource": {
             "source": "/usr/share/gir-1.0/GtkSource-3.0.gir",
@@ -87,9 +73,11 @@
                     "child_notify": "/* child_notify */"
                 },
                 "MenuButton": {
-                    "activate": "/* activate */",
                     "get_direction": "/* get_direction */",
                     "set_direction": "/* set_direction */"
+                },
+                "MenuItem": {
+                    "activate": "/* activate */"
                 },
                 "MountOperation": {
                     "is-showing": "/* is-showing */"
