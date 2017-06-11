@@ -214,11 +214,11 @@ function addGirInfoForFunctionParameters(modName, parameters, outParams, line, s
     }
 }
 
-function addGirInfoForClassMethod(modName, pt, method, methods, out) {
+function addGirInfoForClassMethod(modName, pt, method, prefix, out) {
     let method_name = method.$['name']
 
     if (typeof method.$['introspectable'] != 'undefined' &&
-        (method.$['introspectable']) == "0") {
+            parseInt(method.$['introspectable']) == 0) {
         return;
     }
 
@@ -229,10 +229,7 @@ function addGirInfoForClassMethod(modName, pt, method, methods, out) {
         return;
     }
 
-    if (typeof methods[method_name] != 'undefined') {
-        return;
-    }
-    methods[method_name] = 1
+    method_name = prefix + method_name
 
     addDocumentation(method, '        ', out);   
 
@@ -448,19 +445,17 @@ function addGirInfoForClass(modName, patch, add, klass, out) {
         /**
          * Methods
          */
-        let methods = {}
-
         // TODO: only add method if the name is not already in properties (?)
 
         if (klass.method) {
             for (let method of klass.method) {
-                addGirInfoForClassMethod(modName, pt, method, methods, out)
+                addGirInfoForClassMethod(modName, pt, method, '', out)
             }
         }
 
         if (klass['virtual-method']) {
             for (let method of klass['virtual-method']) {
-                addGirInfoForClassMethod(modName, pt, method, methods, out)
+                addGirInfoForClassMethod(modName, pt, method, 'vfunc_', out)
             }
         }
 
@@ -617,6 +612,11 @@ function addGirInfo(modName, gir, patch, add, out) {
     if (ns.function) 
         for (let func of ns.function) {
             let name = getName(func.$['name'])
+
+            if (typeof func.$['introspectable'] != 'undefined' &&
+                    parseInt(func.$['introspectable']) == 0) {
+                continue;
+            }
 
             let pt = patch ? patch[name] : null
 
